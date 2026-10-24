@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head}"></head>
+<body>
+<header th:replace="~{fragments/common :: header}"></header>
+
+<div class="container">
+    <p style="margin-top:0;"><a th:href="@{/ui/usuarios/{id}(id=${usuarioId})}">&larr; Volver al perfil</a></p>
+    <div style="margin-bottom:24px;">
+        <h2 class="section" style="margin:0;">Pisos de mis matches</h2>
+        <p class="muted" style="margin:6px 0 0;">Los pisos que le han interesado a cada uno de tus matches.</p>
+    </div>
+
+    <p th:if="${#lists.isEmpty(bloques)}" class="muted">Aún no tienes matches o ninguno ha marcado pisos como interesantes.</p>
+
+    <div th:each="b : ${bloques}" style="margin-bottom:32px;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+            <img th:src="${b.match.foto != null and !#strings.isEmpty(b.match.foto)} ? ${b.match.foto} : 'https://ui-avatars.com/api/?name=' + ${b.match.nombre} + '&background=e5e7eb&color=111827&size=96'" alt="" style="width:56px;height:56px;border-radius:50%;object-fit:cover;">
+            <div>
+                <strong th:text="${b.match.nombre} + ', ' + ${b.match.edad}">Match</strong>
+                <div class="muted" th:text="${b.match.profesion}">Profesión</div>
+            </div>
+            <a class="btn secondary" style="box-shadow:none; margin-left:auto;" th:href="@{/ui/usuarios/{id}(id=${b.match.id})}">Ver perfil</a>
+        </div>
+
+        <p th:if="${#lists.isEmpty(b.viviendas)}" class="muted">Aún no ha marcado ningún piso como interesante.</p>
+
+        <div class="grid">
+            <article class="pcard" th:each="v : ${b.viviendas}">
+                <div class="photo"
+                     th:style="${v.fotos != null and !#lists.isEmpty(v.fotos) and v.fotos[0] != null and !#strings.isEmpty(v.fotos[0])} ? 'background-image:url(' + ${v.fotos[0]} + ')' : 'background-image:linear-gradient(135deg,#fecaca,#f8fafc)'"></div>
+                <div class="body">
+                    <h3 th:text="${v.precio} + '€ / mes'">0€</h3>
+                    <div class="place" th:text="${v.zona}">Zona</div>
+                    <p class="muted" style="font-size:.88rem; margin:4px 0 0;" th:text="${v.direccion}">Dirección</p>
+                    <div class="tags">
+                        <span class="tag" th:text="${v.habitaciones} + ' habitaciones'">hab</span>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+</body>
+</html>

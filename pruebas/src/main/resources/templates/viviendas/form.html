@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head}"></head>
+<body>
+<header th:replace="~{fragments/common :: header}"></header>
+
+<div class="container" style="max-width:720px;">
+    <p style="margin-top:0;"><a th:href="@{/ui/usuarios/{id}/viviendas(id=${usuarioId})}">&larr; Volver a mis viviendas</a></p>
+    <div style="margin-bottom:20px;">
+        <h2 class="section" style="margin:0;" th:text="${viviendaId} != null ? 'Editar vivienda' : 'Añadir vivienda'">Vivienda</h2>
+        <p class="muted" style="margin:6px 0 0;">Completa los datos de la vivienda que quieres compartir.</p>
+    </div>
+
+    <div class="card-panel">
+        <form class="profile" method="post" th:action="${viviendaId} != null ? @{/ui/usuarios/{id}/viviendas/{vid}/edit(id=${usuarioId},vid=${viviendaId})} : @{/ui/usuarios/{id}/viviendas(id=${usuarioId})}" th:object="${viviendaForm}">
+            <div>
+                <label for="direccion">Dirección</label>
+                <input id="direccion" type="text" th:field="*{direccion}" placeholder="Calle, número, piso...">
+                <div class="field-error" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></div>
+            </div>
+
+            <div class="two">
+                <div>
+                    <label for="zona">Zona</label>
+                    <input id="zona" type="text" th:field="*{zona}" placeholder="Centro, Salamanca...">
+                    <div class="field-error" th:if="${#fields.hasErrors('zona')}" th:errors="*{zona}"></div>
+                </div>
+                <div>
+                    <label for="precio">Precio mensual (€)</label>
+                    <input id="precio" type="number" th:field="*{precio}" min="0">
+                    <div class="field-error" th:if="${#fields.hasErrors('precio')}" th:errors="*{precio}"></div>
+                </div>
+            </div>
+
+            <div>
+                <label for="habitaciones">Habitaciones</label>
+                <input id="habitaciones" type="number" th:field="*{habitaciones}" min="0">
+                <div class="field-error" th:if="${#fields.hasErrors('habitaciones')}" th:errors="*{habitaciones}"></div>
+            </div>
+
+            <div>
+                <label for="fotos">Fotos (una URL por línea o separadas por coma)</label>
+                <textarea id="fotos" rows="4" th:field="*{fotos}" placeholder="https://picsum.photos/seed/piso1/600/400&#10;https://picsum.photos/seed/piso1b/600/400"></textarea>
+            </div>
+
+            <div style="margin-top:10px; display:flex; gap:12px; flex-wrap: wrap;">
+                <button type="submit" class="btn" th:text="${viviendaId} != null ? 'Guardar cambios' : 'Publicar vivienda'">Guardar</button>
+                <a th:href="@{/ui/usuarios/{id}/viviendas(id=${usuarioId})}" class="btn secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

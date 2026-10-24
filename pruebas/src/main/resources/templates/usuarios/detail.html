@@ -7,7 +7,12 @@
 <div class="container">
     <p style="margin-top:0; display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap:12px;">
         <a th:href="@{/ui/usuarios}">&larr; Volver a usuarios</a>
-        <a class="btn secondary" style="box-shadow:none;" th:href="@{/ui/usuarios/{id}/edit(id=${usuario.id})}">✎ Editar perfil</a>
+        <div style="display:flex; gap:10px; flex-wrap: wrap;">
+            <a class="btn secondary" style="box-shadow:none;" th:href="@{/ui/usuarios/{id}/viviendas(id=${usuario.id})}">🏠 Mis viviendas</a>
+            <a class="btn secondary" style="box-shadow:none;" th:href="@{/ui/usuarios/{id}/intereses(id=${usuario.id})}">❤️ Pisos que me interesan</a>
+            <a class="btn secondary" style="box-shadow:none;" th:href="@{/ui/usuarios/{id}/matches/viviendas(id=${usuario.id})}">🤝 Pisos de mis matches</a>
+            <a class="btn secondary" style="box-shadow:none;" th:href="@{/ui/usuarios/{id}/edit(id=${usuario.id})}">✎ Editar perfil</a>
+        </div>
     </p>
 
     <div class="detail-head">

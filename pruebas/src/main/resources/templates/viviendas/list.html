@@ -9,9 +9,15 @@
         <div>
             <h2 class="section" style="margin:0;">Viviendas
                 (<span th:text="${#lists.size(viviendas)}">0</span>)</h2>
-            <p class="muted" style="margin:6px 0 0;">Habitaciones disponibles publicadas por los usuarios.</p>
+            <p class="muted" style="margin:6px 0 0;">Habitaciones disponibles publicadas por los usuarios. Puedes marcar las que te interesen.</p>
         </div>
-        <a class="btn" th:href="@{/ui/usuarios}">Ver usuarios</a>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
+            <div style="display:flex; align-items:center; gap:8px; background:#fff; padding:6px 12px; border-radius:999px; border:1px solid var(--border);">
+                <label for="interesUsuario">Marcar interés como:</label>
+                <select id="interesUsuario"></select>
+            </div>
+            <a class="btn" th:href="@{/ui/usuarios}">Ver usuarios</a>
+        </div>
     </div>
 
     <p th:if="${#lists.isEmpty(viviendas)}" class="muted">Todavía no hay viviendas publicadas.</p>
@@ -19,7 +25,7 @@
     <div class="grid">
         <article class="pcard" th:each="v : ${viviendas}">
             <div class="photo"
-                 th:style="(${v.fotos} != null and !#lists.isEmpty(v.fotos) and ${v.fotos[0]} != null and !#strings.isEmpty(${v.fotos[0]})) ? 'background-image:url(' + ${v.fotos[0]} + ')' : 'background-image:linear-gradient(135deg,#fecaca,#f8fafc)'"></div>
+                 th:style="${v.fotos != null and !#lists.isEmpty(v.fotos) and v.fotos[0] != null and !#strings.isEmpty(v.fotos[0])} ? 'background-image:url(' + ${v.fotos[0]} + ')' : 'background-image:linear-gradient(135deg,#fecaca,#f8fafc)'"></div>
             <div class="body">
                 <h3 th:text="${v.zona}">Zona</h3>
                 <div class="place" th:text="${v.direccion}">Dirección</div>
@@ -32,9 +38,50 @@
                     <a th:href="@{/ui/usuarios/{id}(id=${v.propietarioId})}"
                        th:text="'#' + ${v.propietarioId}">#0</a>
                 </div>
+                <div style="margin-top:12px; display:flex; gap:10px; flex-wrap: wrap;">
+                    <button class="btn secondary" style="box-shadow:none; padding:8px 14px;" th:attr="data-id=${v.id}" onclick="toggleInteres(this)">❤️ Me interesa</button>
+                </div>
             </div>
         </article>
     </div>
 </div>
+
+<script>
+    const API = '/api/v1';
+    const sel = document.getElementById('interesUsuario');
+    async function loadUsers() {
+        try {
+            const res = await fetch(API + '/usuarios');
+            const users = await res.json();
+            sel.innerHTML = '';
+            users.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.id;
+                opt.textContent = u.nombre + (u.profesion ? ' · ' + u.profesion : '');
+                sel.appendChild(opt);
+            });
+            if (users.length) sel.value = users[0].id;
+        } catch (e) {}
+    }
+    async function toggleInteres(btn) {
+        const userId = sel.value;
+        if (!userId) return alert('Selecciona un usuario');
+        const vid = btn.getAttribute('data-id');
+        try {
+            const res = await fetch(API + '/viviendas/' + vid + '/interes?usuarioId=' + userId, { method: 'POST' });
+            if (res.ok) {
+                btn.textContent = '✓ Marcado';
+                btn.disabled = true;
+            } else {
+                alert('No se ha podido marcar como interesante');
+            }
+        } catch (e) {
+            alert('Error al marcar interés');
+        }
+    }
+    loadUsers();
+</script>
+</body>
+</html>
 </body>
 </html>

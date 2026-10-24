@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head}"></head>
+<body>
+<header th:replace="~{fragments/common :: header}"></header>
+
+<div class="container">
+    <p style="margin-top:0;"><a th:href="@{/ui/usuarios/{id}(id=${usuarioId})}">&larr; Volver al perfil</a></p>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; gap:16px; flex-wrap: wrap;">
+        <div>
+            <h2 class="section" style="margin:0;">Mis viviendas</h2>
+            <p class="muted" style="margin:6px 0 0;">Viviendas que has publicado para compartir.</p>
+        </div>
+        <a class="btn" th:href="@{/ui/usuarios/{id}/viviendas/new(id=${usuarioId})}">+ Añadir vivienda</a>
+    </div>
+
+    <p th:if="${#lists.isEmpty(viviendas)}" class="muted">Aún no has publicado ninguna vivienda.</p>
+
+    <div class="grid">
+        <article class="pcard" th:each="v : ${viviendas}">
+            <div class="photo"
+                 th:style="${v.fotos != null and !#lists.isEmpty(v.fotos) and v.fotos[0] != null and !#strings.isEmpty(v.fotos[0])} ? 'background-image:url(' + ${v.fotos[0]} + ')' : 'background-image:linear-gradient(135deg,#fecaca,#f8fafc)'"></div>
+            <div class="body">
+                <h3 th:text="${v.precio} + '€ / mes'">0€</h3>
+                <div class="place" th:text="${v.zona}">Zona</div>
+                <p class="muted" style="font-size:.88rem; margin:4px 0 0;" th:text="${v.direccion}">Dirección</p>
+                <div class="tags">
+                    <span class="tag" th:text="${v.habitaciones} + ' habitaciones'">hab</span>
+                </div>
+                <div style="margin-top:12px; display:flex; gap:10px; flex-wrap: wrap;">
+                    <a class="btn secondary" style="box-shadow:none; padding:8px 14px;" th:href="@{/ui/usuarios/{id}/viviendas/{vid}/edit(id=${usuarioId},vid=${v.id})}">Editar</a>
+                    <form th:action="@{/ui/usuarios/{id}/viviendas/{vid}/delete(id=${usuarioId},vid=${v.id})}" method="post" onsubmit="return confirm('¿Eliminar esta vivienda?');">
+                        <button class="btn secondary" style="box-shadow:none; padding:8px 14px;" type="submit">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+</body>
+</html>

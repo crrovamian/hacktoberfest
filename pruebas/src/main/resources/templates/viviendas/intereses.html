@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head}"></head>
+<body>
+<header th:replace="~{fragments/common :: header}"></header>
+
+<div class="container">
+    <p style="margin-top:0;"><a th:href="@{/ui/usuarios/{id}(id=${usuarioId})}">&larr; Volver al perfil</a></p>
+    <div style="margin-bottom:24px;">
+        <h2 class="section" style="margin:0;">Pisos que me interesan</h2>
+        <p class="muted" style="margin:6px 0 0;">Los pisos que has marcado como interesantes.</p>
+    </div>
+
+    <p th:if="${#lists.isEmpty(viviendas)}" class="muted">Aún no has marcado ningún piso como interesante.</p>
+
+    <div class="grid">
+        <article class="pcard" th:each="v : ${viviendas}">
+            <div class="photo"
+                 th:style="${v.fotos != null and !#lists.isEmpty(v.fotos) and v.fotos[0] != null and !#strings.isEmpty(v.fotos[0])} ? 'background-image:url(' + ${v.fotos[0]} + ')' : 'background-image:linear-gradient(135deg,#fecaca,#f8fafc)'"></div>
+            <div class="body">
+                <h3 th:text="${v.precio} + '€ / mes'">0€</h3>
+                <div class="place" th:text="${v.zona}">Zona</div>
+                <p class="muted" style="font-size:.88rem; margin:4px 0 0;" th:text="${v.direccion}">Dirección</p>
+                <div class="tags">
+                    <span class="tag" th:text="${v.habitaciones} + ' habitaciones'">hab</span>
+                    <span class="tag">Propietario #<span th:text="${v.propietarioId}">0</span></span>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+</body>
+</html>

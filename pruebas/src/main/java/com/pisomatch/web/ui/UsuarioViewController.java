@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Vistas Thymeleaf: listado de usuarios, detalle (con perfil, preferencias,
@@ -174,5 +177,97 @@ public class UsuarioViewController {
     public String viviendas(Model model) {
         model.addAttribute("viviendas", viviendaService.findAll());
         return "viviendas/list";
+    }
+
+    @GetMapping("/ui/usuarios/{id}/viviendas")
+    public String misViviendas(@PathVariable Long id, Model model) {
+        model.addAttribute("usuario", usuarioService.getById(id));
+        model.addAttribute("viviendas", viviendaService.findByPropietario(id));
+        model.addAttribute("usuarioId", id);
+        return "viviendas/mis-viviendas";
+    }
+
+    @GetMapping("/ui/usuarios/{id}/viviendas/new")
+    public String nuevaVivienda(@PathVariable Long id, Model model) {
+        model.addAttribute("usuario", usuarioService.getById(id));
+        model.addAttribute("usuarioId", id);
+        model.addAttribute("viviendaForm", new ViviendaForm());
+        return "viviendas/form";
+    }
+
+    @PostMapping("/ui/usuarios/{id}/viviendas")
+    public String crearVivienda(@PathVariable Long id,
+                                @Valid @ModelAttribute("viviendaForm") ViviendaForm form,
+                                BindingResult binding,
+                                Model model) {
+        if (binding.hasErrors()) {
+            model.addAttribute("usuario", usuarioService.getById(id));
+            model.addAttribute("usuarioId", id);
+            return "viviendas/form";
+        }
+        viviendaService.create(new com.pisomatch.web.dto.ViviendaRequest(id, form.getDireccion(),
+                form.getZona(), form.getPrecio(), form.getHabitaciones(), form.getFotosLista()));
+        return "redirect:/ui/usuarios/" + id + "/viviendas";
+    }
+
+    @GetMapping("/ui/usuarios/{id}/viviendas/{viviendaId}/edit")
+    public String editarVivienda(@PathVariable Long id, @PathVariable Long viviendaId, Model model) {
+        com.pisomatch.domain.Vivienda v = viviendaService.getById(viviendaId);
+        model.addAttribute("usuario", usuarioService.getById(id));
+        model.addAttribute("usuarioId", id);
+        model.addAttribute("viviendaId", viviendaId);
+        ViviendaForm form = new ViviendaForm();
+        form.setDireccion(v.getDireccion());
+        form.setZona(v.getZona());
+        form.setPrecio(v.getPrecio());
+        form.setHabitaciones(v.getHabitaciones());
+        form.setFotos(String.join("\n", v.getFotos() != null ? v.getFotos() : List.of()));
+        model.addAttribute("viviendaForm", form);
+        return "viviendas/form";
+    }
+
+    @PostMapping("/ui/usuarios/{id}/viviendas/{viviendaId}/edit")
+    public String actualizarVivienda(@PathVariable Long id, @PathVariable Long viviendaId,
+                                     @Valid @ModelAttribute("viviendaForm") ViviendaForm form,
+                                     BindingResult binding,
+                                     Model model) {
+        if (binding.hasErrors()) {
+            model.addAttribute("usuario", usuarioService.getById(id));
+            model.addAttribute("usuarioId", id);
+            model.addAttribute("viviendaId", viviendaId);
+            return "viviendas/form";
+        }
+        viviendaService.update(viviendaId, new com.pisomatch.web.dto.ViviendaRequest(id, form.getDireccion(),
+                form.getZona(), form.getPrecio(), form.getHabitaciones(), form.getFotosLista()));
+        return "redirect:/ui/usuarios/" + id + "/viviendas";
+    }
+
+    @PostMapping("/ui/usuarios/{id}/viviendas/{viviendaId}/delete")
+    public String borrarVivienda(@PathVariable Long id, @PathVariable Long viviendaId) {
+        viviendaService.delete(viviendaId, id);
+        return "redirect:/ui/usuarios/" + id + "/viviendas";
+    }
+
+    @GetMapping("/ui/usuarios/{id}/intereses")
+    public String misIntereses(@PathVariable Long id, Model model) {
+        model.addAttribute("usuario", usuarioService.getById(id));
+        model.addAttribute("viviendas", viviendaService.interesesDe(id));
+        model.addAttribute("usuarioId", id);
+        return "viviendas/intereses";
+    }
+
+    @GetMapping("/ui/usuarios/{id}/matches/viviendas")
+    public String viviendasDeMisMatches(@PathVariable Long id, Model model) {
+        model.addAttribute("usuario", usuarioService.getById(id));
+        model.addAttribute("usuarioId", id);
+        List<Map<String, Object>> bloques = new ArrayList<>();
+        for (com.pisomatch.web.dto.MatchResponse m : matchingService.matchesOf(id)) {
+            Map<String, Object> bloque = new HashMap<>();
+            bloque.put("match", m.con());
+            bloque.put("viviendas", viviendaService.interesesDe(m.con().id()));
+            bloques.add(bloque);
+        }
+        model.addAttribute("bloques", bloques);
+        return "viviendas/matches-viviendas";
     }
 }
