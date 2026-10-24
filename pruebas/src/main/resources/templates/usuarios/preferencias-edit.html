@@ -26,10 +26,94 @@
                 </div>
             </div>
 
+            <div class="two">
+                <div>
+                    <label for="ccaa">Comunidad Autónoma</label>
+                    <select id="ccaa" onchange="cargarProvincias()">
+                        <option value="">Selecciona comunidad</option>
+                        <option value="Andalucía">Andalucía</option>
+                        <option value="Aragón">Aragón</option>
+                        <option value="Asturias">Asturias, Principado de</option>
+                        <option value="Baleares">Illes Balears</option>
+                        <option value="Canarias">Canarias</option>
+                        <option value="Cantabria">Cantabria</option>
+                        <option value="Castilla-La Mancha">Castilla-La Mancha</option>
+                        <option value="Castilla y León">Castilla y León</option>
+                        <option value="Cataluña">Cataluña</option>
+                        <option value="Ceuta">Ceuta</option>
+                        <option value="Comunidad Valenciana">Comunidad Valenciana</option>
+                        <option value="Extremadura">Extremadura</option>
+                        <option value="Galicia">Galicia</option>
+                        <option value="Madrid">Comunidad de Madrid</option>
+                        <option value="Melilla">Melilla</option>
+                        <option value="Murcia">Región de Murcia</option>
+                        <option value="Navarra">Navarra, Comunidad Foral de</option>
+                        <option value="País Vasco">País Vasco</option>
+                        <option value="La Rioja">La Rioja</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="provinciaSel">Provincia / Ciudad Autónoma</label>
+                    <select id="provinciaSel" onchange="aplicarZona()"></select>
+                </div>
+            </div>
+
             <div>
                 <label for="zonaDeseada">Zona deseada</label>
-                <input id="zonaDeseada" type="text" th:field="*{zonaDeseada}" placeholder="Madrid, Centro, Barcelona...">
+                <input id="zonaDeseada" type="text" th:field="*{zonaDeseada}" placeholder="Selecciona comunidad y provincia" readonly>
                 <div class="field-error" th:if="${#fields.hasErrors('zonaDeseada')}" th:errors="*{zonaDeseada}"></div>
+            </div>
+
+            <h3 style="margin:18px 0 10px;">Filtros de convivencia</h3>
+            <div class="two">
+                <div>
+                    <label for="aceptaMascotas">Mascotas</label>
+                    <select id="aceptaMascotas" th:field="*{aceptaMascotas}">
+                        <option value="Sin preferencia">Sin preferencia</option>
+                        <option value="Sí">Acepta mascotas</option>
+                        <option value="No">No acepta mascotas</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="fumador">Fumador</label>
+                    <select id="fumador" th:field="*{fumador}">
+                        <option value="Sin preferencia">Sin preferencia</option>
+                        <option value="No fumador">Busco no fumador</option>
+                        <option value="Fumador">Acepto fumador</option>
+                        <option value="Indiferente">Indiferente</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="two">
+                <div>
+                    <label for="nivelRuido">Ruido</label>
+                    <select id="nivelRuido" th:field="*{nivelRuido}">
+                        <option value="Sin preferencia">Sin preferencia</option>
+                        <option value="Tranquilo">Tranquilo / silencioso</option>
+                        <option value="Indiferente">Indiferente</option>
+                        <option value="Sociable">Sociable / ambiente animado</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="visitas">Visitas</label>
+                    <select id="visitas" th:field="*{visitas}">
+                        <option value="Sin preferencia">Sin preferencia</option>
+                        <option value="Pocas">Pocas visitas</option>
+                        <option value="Moderadas">Visitas moderadas</option>
+                        <option value="Frecuentes">Visitas frecuentes</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label for="limpieza">Limpieza</label>
+                <select id="limpieza" th:field="*{limpieza}">
+                    <option value="Sin preferencia">Sin preferencia</option>
+                    <option value="Muy ordenado">Muy ordenado / exigente con la limpieza</option>
+                    <option value="Normal">Limpieza normal</option>
+                    <option value="Relajado">Relajado con la limpieza</option>
+                </select>
             </div>
 
             <div style="margin-top:10px; display:flex; gap:12px; flex-wrap: wrap;">
@@ -39,5 +123,79 @@
         </form>
     </div>
 </div>
+
+<script>
+const provinciasPorCCAA = {
+  "Andalucía": ["Almería", "Cádiz", "Córdoba", "Granada", "Huelva", "Jaén", "Málaga", "Sevilla"],
+  "Aragón": ["Huesca", "Teruel", "Zaragoza"],
+  "Asturias": ["Asturias"],
+  "Baleares": ["Illes Balears"],
+  "Canarias": ["Las Palmas", "Santa Cruz de Tenerife"],
+  "Cantabria": ["Cantabria"],
+  "Castilla-La Mancha": ["Albacete", "Ciudad Real", "Cuenca", "Guadalajara", "Toledo"],
+  "Castilla y León": ["Ávila", "Burgos", "León", "Palencia", "Salamanca", "Segovia", "Soria", "Valladolid", "Zamora"],
+  "Cataluña": ["Barcelona", "Girona", "Lleida", "Tarragona"],
+  "Ceuta": ["Ceuta"],
+  "Comunidad Valenciana": ["Alicante", "Castellón", "Valencia"],
+  "Extremadura": ["Badajoz", "Cáceres"],
+  "Galicia": ["A Coruña", "Lugo", "Ourense", "Pontevedra"],
+  "Madrid": ["Madrid"],
+  "Melilla": ["Melilla"],
+  "Murcia": ["Murcia"],
+  "Navarra": ["Navarra"],
+  "País Vasco": ["Álava", "Bizkaia", "Gipuzkoa"],
+  "La Rioja": ["La Rioja"]
+};
+
+const zonaInput = document.getElementById('zonaDeseada');
+const ccaaSel = document.getElementById('ccaa');
+const provSel = document.getElementById('provinciaSel');
+
+function cargarProvincias() {
+  provSel.innerHTML = '';
+  const ccaa = ccaaSel.value;
+  if (!ccaa || !provinciasPorCCAA[ccaa]) {
+    aplicarZona();
+    return;
+  }
+  provinciasPorCCAA[ccaa].forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    provSel.appendChild(opt);
+  });
+  aplicarZona();
+}
+
+function aplicarZona() {
+  if (provSel.value) {
+    zonaInput.value = provSel.value;
+  } else if (ccaaSel.value) {
+    zonaInput.value = ccaaSel.value;
+  } else {
+    zonaInput.value = '';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const actual = zonaInput.value;
+  if (!actual) return;
+  for (const [ccaa, provs] of Object.entries(provinciasPorCCAA)) {
+    if (provs.includes(actual)) {
+      ccaaSel.value = ccaa;
+      cargarProvincias();
+      provSel.value = actual;
+      aplicarZona();
+      return;
+    }
+    if (actual === ccaa) {
+      ccaaSel.value = ccaa;
+      cargarProvincias();
+      aplicarZona();
+      return;
+    }
+  }
+});
+</script>
 </body>
 </html>

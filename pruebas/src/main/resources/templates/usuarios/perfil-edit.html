@@ -20,25 +20,35 @@
                     <div class="field-error" th:if="${#fields.hasErrors('presupuesto')}" th:errors="*{presupuesto}"></div>
                 </div>
                 <div>
-                    <label for="ciudad">Ciudad / Ubicación</label>
-                    <select id="ciudad" th:field="*{ciudad}">
-                        <option value="Madrid">Madrid</option>
-                        <option value="Barcelona">Barcelona</option>
-                        <option value="Valencia">Valencia</option>
-                        <option value="Sevilla">Sevilla</option>
-                        <option value="Bilbao">Bilbao</option>
-                        <option value="Málaga">Málaga</option>
-                        <option value="Zaragoza">Zaragoza</option>
-                        <option value="Alicante">Alicante</option>
-                        <option value="Granada">Granada</option>
-                        <option value="Salamanca">Salamanca</option>
-                        <option value="Palma de Mallorca">Palma de Mallorca</option>
-                        <option value="Las Palmas de Gran Canaria">Las Palmas de Gran Canaria</option>
-                        <option value="Otro">Otro</option>
-                    </select>
-                    <div class="field-error" th:if="${#fields.hasErrors('ciudad')}" th:errors="*{ciudad}"></div>
+                    <label>Ubicación</label>
+                    <div style="display:flex; gap:8px; flex-direction:column;">
+                        <select id="ccaaPerfil" onchange="cargarProvinciasPerfil()">
+                            <option value="">Comunidad Autónoma</option>
+                            <option value="Andalucía">Andalucía</option>
+                            <option value="Aragón">Aragón</option>
+                            <option value="Asturias">Asturias, Principado de</option>
+                            <option value="Baleares">Illes Balears</option>
+                            <option value="Canarias">Canarias</option>
+                            <option value="Cantabria">Cantabria</option>
+                            <option value="Castilla-La Mancha">Castilla-La Mancha</option>
+                            <option value="Castilla y León">Castilla y León</option>
+                            <option value="Cataluña">Cataluña</option>
+                            <option value="Ceuta">Ceuta</option>
+                            <option value="Comunidad Valenciana">Comunidad Valenciana</option>
+                            <option value="Extremadura">Extremadura</option>
+                            <option value="Galicia">Galicia</option>
+                            <option value="Madrid">Comunidad de Madrid</option>
+                            <option value="Melilla">Melilla</option>
+                            <option value="Murcia">Región de Murcia</option>
+                            <option value="Navarra">Navarra, Comunidad Foral de</option>
+                            <option value="País Vasco">País Vasco</option>
+                            <option value="La Rioja">La Rioja</option>
+                        </select>
+                        <select id="provinciaPerfilSel" onchange="aplicarCiudadPerfil()"></select>
+                    </div>
                 </div>
             </div>
+            <input id="ciudad" type="hidden" th:field="*{ciudad}">
 
             <div>
                 <label for="fechaEntrada">Fecha de entrada (opcional)</label>
@@ -64,5 +74,82 @@
         </form>
     </div>
 </div>
+
+<script>
+const provinciasPorCCAA = {
+  "Andalucía": ["Almería", "Cádiz", "Córdoba", "Granada", "Huelva", "Jaén", "Málaga", "Sevilla"],
+  "Aragón": ["Huesca", "Teruel", "Zaragoza"],
+  "Asturias": ["Asturias"],
+  "Baleares": ["Illes Balears"],
+  "Canarias": ["Las Palmas", "Santa Cruz de Tenerife"],
+  "Cantabria": ["Cantabria"],
+  "Castilla-La Mancha": ["Albacete", "Ciudad Real", "Cuenca", "Guadalajara", "Toledo"],
+  "Castilla y León": ["Ávila", "Burgos", "León", "Palencia", "Salamanca", "Segovia", "Soria", "Valladolid", "Zamora"],
+  "Cataluña": ["Barcelona", "Girona", "Lleida", "Tarragona"],
+  "Ceuta": ["Ceuta"],
+  "Comunidad Valenciana": ["Alicante", "Castellón", "Valencia"],
+  "Extremadura": ["Badajoz", "Cáceres"],
+  "Galicia": ["A Coruña", "Lugo", "Ourense", "Pontevedra"],
+  "Madrid": ["Madrid"],
+  "Melilla": ["Melilla"],
+  "Murcia": ["Murcia"],
+  "Navarra": ["Navarra"],
+  "País Vasco": ["Álava", "Bizkaia", "Gipuzkoa"],
+  "La Rioja": ["La Rioja"]
+};
+
+const ciudadInput = document.getElementById('ciudad');
+const ccaaP = document.getElementById('ccaaPerfil');
+const provP = document.getElementById('provinciaPerfilSel');
+
+function cargarProvinciasPerfil() {
+  provP.innerHTML = '';
+  const ccaa = ccaaP.value;
+  if (!ccaa || !provinciasPorCCAA[ccaa]) {
+    aplicarCiudadPerfil();
+    return;
+  }
+  provinciasPorCCAA[ccaa].forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    provP.appendChild(opt);
+  });
+  aplicarCiudadPerfil();
+}
+
+function aplicarCiudadPerfil() {
+  if (provP.value) {
+    ciudadInput.value = provP.value;
+  } else if (ccaaP.value) {
+    ciudadInput.value = ccaaP.value;
+  } else {
+    ciudadInput.value = '';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const actual = ciudadInput.value;
+  if (!actual) return;
+  for (const [ccaa, provs] of Object.entries(provinciasPorCCAA)) {
+    if (provs.includes(actual)) {
+      ccaaP.value = ccaa;
+      cargarProvinciasPerfil();
+      provP.value = actual;
+      aplicarCiudadPerfil();
+      return;
+    }
+    if (actual === ccaa) {
+      ccaaP.value = ccaa;
+      cargarProvinciasPerfil();
+      aplicarCiudadPerfil();
+      return;
+    }
+  }
+  // Si no está en lista, mantener valor
+  ciudadInput.type = 'text';
+  ciudadInput.readOnly = false;
+});
+</script>
 </body>
 </html>
