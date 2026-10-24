@@ -5,7 +5,10 @@
 <header th:replace="~{fragments/common :: header}"></header>
 
 <div class="container">
-    <p style="margin-top:0;"><a th:href="@{/ui/usuarios}">&larr; Volver a usuarios</a></p>
+    <p style="margin-top:0; display:flex; align-items:center; justify-content:space-between; flex-wrap: wrap; gap:12px;">
+        <a th:href="@{/ui/usuarios}">&larr; Volver a usuarios</a>
+        <a class="btn secondary" style="box-shadow:none;" th:href="@{/ui/usuarios/{id}/edit(id=${usuario.id})}">✎ Editar perfil</a>
+    </p>
 
     <div class="detail-head">
         <img th:src="${usuario.foto != null and !#strings.isEmpty(usuario.foto)} ? ${usuario.foto} : 'https://ui-avatars.com/api/?name=' + ${usuario.nombre} + '&background=fda4af&color=1f2937&size=240'" alt="Foto de perfil">
@@ -17,7 +20,10 @@
     </div>
 
     <!-- Perfil de convivencia -->
-    <h2 class="section">Perfil de convivencia</h2>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:12px; flex-wrap: wrap;">
+        <h2 class="section" style="margin:0;">Perfil de convivencia</h2>
+        <a class="btn secondary" style="box-shadow:none; padding:8px 16px;" th:href="@{/ui/usuarios/{id}/perfil/edit(id=${usuario.id})}">✎ Editar</a>
+    </div>
     <div class="card-panel" style="margin-bottom:24px;">
         <div th:if="${perfil == null}" class="muted">Sin perfil de convivencia.</div>
         <div th:if="${perfil != null}">
@@ -28,14 +34,17 @@
                       th:text="'📅 Entra el ' + ${#temporals.format(perfil.fechaEntrada, 'dd/MM/yyyy')}">fecha</span>
             </div>
             <p style="margin:12px 0 0;"><strong>Hábitos:</strong>
-                <span th:text="${perfil.habitos}">—</span></p>
+                <span th:text="${perfil.habitos != null and !#strings.isEmpty(perfil.habitos)} ? ${perfil.habitos} : '—'">—</span></p>
             <p style="margin:6px 0 0;"><strong>Preferencias:</strong>
-                <span th:text="${perfil.preferencias}">—</span></p>
+                <span th:text="${perfil.preferencias != null and !#strings.isEmpty(perfil.preferencias)} ? ${perfil.preferencias} : '—'">—</span></p>
         </div>
     </div>
 
     <!-- Preferencias de búsqueda -->
-    <h2 class="section">Preferencias de búsqueda</h2>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:12px; flex-wrap: wrap;">
+        <h2 class="section" style="margin:0;">Preferencias de búsqueda</h2>
+        <a class="btn secondary" style="box-shadow:none; padding:8px 16px;" th:href="@{/ui/usuarios/{id}/preferencias/edit(id=${usuario.id})}">✎ Editar</a>
+    </div>
     <div class="card-panel" style="margin-bottom:24px;">
         <div th:if="${preferencias == null}" class="muted">Sin preferencias de búsqueda.</div>
         <div th:if="${preferencias != null}" class="tags">

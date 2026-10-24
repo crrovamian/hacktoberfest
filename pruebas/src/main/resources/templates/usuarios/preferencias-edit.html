@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head}"></head>
+<body>
+<header th:replace="~{fragments/common :: header}"></header>
+
+<div class="container" style="max-width:720px;">
+    <p style="margin-top:0;"><a th:href="@{/ui/usuarios/{id}(id=${usuarioId})}">&larr; Volver al perfil</a></p>
+    <div style="margin-bottom:20px;">
+        <h2 class="section" style="margin:0;">Editar preferencias de búsqueda</h2>
+        <p class="muted" style="margin:6px 0 0;">Qué estás buscando para encontrar al compañero/a ideal.</p>
+    </div>
+
+    <div class="card-panel">
+        <form class="profile" method="post" th:action="@{/ui/usuarios/{id}/preferencias/edit(id=${usuarioId})}" th:object="${preferenciasForm}">
+            <div class="two">
+                <div>
+                    <label for="presupuestoMinimo">Presupuesto mínimo (€/mes)</label>
+                    <input id="presupuestoMinimo" type="number" th:field="*{presupuestoMinimo}" min="0">
+                    <div class="field-error" th:if="${#fields.hasErrors('presupuestoMinimo')}" th:errors="*{presupuestoMinimo}"></div>
+                </div>
+                <div>
+                    <label for="presupuestoMaximo">Presupuesto máximo (€/mes)</label>
+                    <input id="presupuestoMaximo" type="number" th:field="*{presupuestoMaximo}" min="0">
+                    <div class="field-error" th:if="${#fields.hasErrors('presupuestoMaximo')}" th:errors="*{presupuestoMaximo}"></div>
+                </div>
+            </div>
+
+            <div>
+                <label for="zonaDeseada">Zona deseada</label>
+                <input id="zonaDeseada" type="text" th:field="*{zonaDeseada}" placeholder="Madrid, Centro, Barcelona...">
+                <div class="field-error" th:if="${#fields.hasErrors('zonaDeseada')}" th:errors="*{zonaDeseada}"></div>
+            </div>
+
+            <div style="margin-top:10px; display:flex; gap:12px; flex-wrap: wrap;">
+                <button type="submit" class="btn">Guardar cambios</button>
+                <a th:href="@{/ui/usuarios/{id}(id=${usuarioId})}" class="btn secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

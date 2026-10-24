@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head}"></head>
+<body>
+<header th:replace="~{fragments/common :: header}"></header>
+
+<div class="container" style="max-width:720px;">
+    <p style="margin-top:0;"><a th:href="@{/ui/usuarios/{id}(id=${usuarioId})}">&larr; Volver al perfil</a></p>
+    <div style="margin-bottom:20px;">
+        <h2 class="section" style="margin:0;">Editar perfil</h2>
+        <p class="muted" style="margin:6px 0 0;">Actualiza los datos de <span th:text="${usuario.nombre}">usuario</span>.</p>
+    </div>
+
+    <div class="card-panel">
+        <form class="profile" method="post" th:action="@{/ui/usuarios/{id}/edit(id=${usuarioId})}" th:object="${usuarioForm}">
+            <div>
+                <label for="nombre">Nombre</label>
+                <input id="nombre" type="text" th:field="*{nombre}" placeholder="Tu nombre">
+                <div class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+            </div>
+
+            <div class="two">
+                <div>
+                    <label for="edad">Edad</label>
+                    <input id="edad" type="number" th:field="*{edad}" min="18" max="99">
+                    <div class="field-error" th:if="${#fields.hasErrors('edad')}" th:errors="*{edad}"></div>
+                </div>
+                <div>
+                    <label for="profesion">Profesión</label>
+                    <input id="profesion" type="text" th:field="*{profesion}" placeholder="p. ej. Diseñador UX">
+                </div>
+            </div>
+
+            <div>
+                <label for="foto">Foto (URL)</label>
+                <input id="foto" type="url" th:field="*{foto}" placeholder="https://i.pravatar.cc/500?img=1">
+            </div>
+
+            <div>
+                <label for="descripcion">Descripción</label>
+                <textarea id="descripcion" rows="4" th:field="*{descripcion}" placeholder="Cuéntale a los demás cómo es tu forma de vivir..."></textarea>
+                <div class="field-error" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></div>
+            </div>
+
+            <div style="margin-top:10px; display:flex; gap:12px; flex-wrap: wrap;">
+                <button type="submit" class="btn">Guardar cambios</button>
+                <a th:href="@{/ui/usuarios/{id}(id=${usuarioId})}" class="btn secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head}"></head>
+<body>
+<header th:replace="~{fragments/common :: header}"></header>
+
+<div class="container" style="max-width:720px;">
+    <p style="margin-top:0;"><a th:href="@{/ui/usuarios/{id}(id=${usuarioId})}">&larr; Volver al perfil</a></p>
+    <div style="margin-bottom:20px;">
+        <h2 class="section" style="margin:0;">Editar perfil de convivencia</h2>
+        <p class="muted" style="margin:6px 0 0;">Cómo vives y qué buscas en la convivencia de <span th:text="${usuario.nombre}">usuario</span>.</p>
+    </div>
+
+    <div class="card-panel">
+        <form class="profile" method="post" th:action="@{/ui/usuarios/{id}/perfil/edit(id=${usuarioId})}" th:object="${perfilForm}">
+            <div class="two">
+                <div>
+                    <label for="presupuesto">Presupuesto (€/mes)</label>
+                    <input id="presupuesto" type="number" th:field="*{presupuesto}" min="0">
+                    <div class="field-error" th:if="${#fields.hasErrors('presupuesto')}" th:errors="*{presupuesto}"></div>
+                </div>
+                <div>
+                    <label for="ciudad">Ciudad / Ubicación</label>
+                    <input id="ciudad" type="text" th:field="*{ciudad}" placeholder="Madrid">
+                    <div class="field-error" th:if="${#fields.hasErrors('ciudad')}" th:errors="*{ciudad}"></div>
+                </div>
+            </div>
+
+            <div>
+                <label for="fechaEntrada">Fecha de entrada (opcional)</label>
+                <input id="fechaEntrada" type="date" th:field="*{fechaEntrada}">
+            </div>
+
+            <div>
+                <label for="habitos">Hábitos</label>
+                <textarea id="habitos" rows="3" th:field="*{habitos}" placeholder="No fumo, madrugador, tengo perro..."></textarea>
+                <div class="field-error" th:if="${#fields.hasErrors('habitos')}" th:errors="*{habitos}"></div>
+            </div>
+
+            <div>
+                <label for="preferencias">Preferencias de convivencia</label>
+                <textarea id="preferencias" rows="3" th:field="*{preferencias}" placeholder="Busco ambiente tranquilo, limpio y respetuoso..."></textarea>
+                <div class="field-error" th:if="${#fields.hasErrors('preferencias')}" th:errors="*{preferencias}"></div>
+            </div>
+
+            <div style="margin-top:10px; display:flex; gap:12px; flex-wrap: wrap;">
+                <button type="submit" class="btn">Guardar cambios</button>
+                <a th:href="@{/ui/usuarios/{id}(id=${usuarioId})}" class="btn secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
