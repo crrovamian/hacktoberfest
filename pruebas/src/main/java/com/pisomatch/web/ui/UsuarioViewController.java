@@ -176,6 +176,7 @@ public class UsuarioViewController {
     @GetMapping("/ui/viviendas")
     public String viviendas(Model model) {
         model.addAttribute("viviendas", viviendaService.findAll());
+        model.addAttribute("usuarios", usuarioService.findAll());
         return "viviendas/list";
     }
 

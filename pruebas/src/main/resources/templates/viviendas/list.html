@@ -13,7 +13,7 @@
         </div>
         <div style="display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
             <div style="display:flex; align-items:center; gap:8px; background:#fff; padding:6px 12px; border-radius:999px; border:1px solid var(--border);">
-                <label for="interesUsuario">Marcar interés como:</label>
+                <label for="interesUsuario">Ver/marcar interés como:</label>
                 <select id="interesUsuario"></select>
             </div>
             <a class="btn" th:href="@{/ui/usuarios}">Ver usuarios</a>
@@ -38,8 +38,14 @@
                     <a th:href="@{/ui/usuarios/{id}(id=${v.propietarioId})}"
                        th:text="'#' + ${v.propietarioId}">#0</a>
                 </div>
+                <div style="margin-top:10px;">
+                    <details class="interesados">
+                        <summary style="cursor:pointer; font-size:.88rem; color:var(--muted);">Ver quién le ha dado me gusta</summary>
+                        <div class="interesados-list" th:attr="data-vid=${v.id}">Cargando...</div>
+                    </details>
+                </div>
                 <div style="margin-top:12px; display:flex; gap:10px; flex-wrap: wrap;">
-                    <button class="btn secondary" style="box-shadow:none; padding:8px 14px;" th:attr="data-id=${v.id}" onclick="toggleInteres(this)">❤️ Me interesa</button>
+                    <button class="btn secondary btn-interes" style="box-shadow:none; padding:8px 14px;" th:attr="data-id=${v.id}" onclick="toggleInteres(this)">❤️ Me interesa</button>
                 </div>
             </div>
         </article>
@@ -49,36 +55,157 @@
 <script>
     const API = '/api/v1';
     const sel = document.getElementById('interesUsuario');
+    const usuariosMap = {};
+    let misIntereses = new Set();
+
     async function loadUsers() {
         try {
             const res = await fetch(API + '/usuarios');
             const users = await res.json();
             sel.innerHTML = '';
             users.forEach(u => {
+                usuariosMap[u.id] = u;
                 const opt = document.createElement('option');
                 opt.value = u.id;
                 opt.textContent = u.nombre + (u.profesion ? ' · ' + u.profesion : '');
                 sel.appendChild(opt);
             });
-            if (users.length) sel.value = users[0].id;
+            if (users.length) {
+                sel.value = users[0].id;
+                await cargarMisIntereses();
+                actualizarBotones();
+            }
         } catch (e) {}
     }
+
+    async function cargarMisIntereses() {
+        if (!sel.value) return;
+        try {
+            const res = await fetch(API + '/viviendas/intereses/ids?usuarioId=' + sel.value);
+            const ids = await res.json();
+            misIntereses = new Set(ids.map(x => Number(x)));
+        } catch (e) {}
+    }
+
+    function actualizarBotones() {
+        document.querySelectorAll('.btn-interes').forEach(btn => {
+            const vid = Number(btn.getAttribute('data-id'));
+            if (misIntereses.has(vid)) {
+                btn.textContent = '💔 Quitar interés';
+                btn.dataset.state = 'on';
+            } else {
+                btn.textContent = '❤️ Me interesa';
+                btn.dataset.state = 'off';
+            }
+        });
+    }
+
     async function toggleInteres(btn) {
         const userId = sel.value;
         if (!userId) return alert('Selecciona un usuario');
         const vid = btn.getAttribute('data-id');
+        const state = btn.dataset.state;
         try {
-            const res = await fetch(API + '/viviendas/' + vid + '/interes?usuarioId=' + userId, { method: 'POST' });
-            if (res.ok) {
-                btn.textContent = '✓ Marcado';
-                btn.disabled = true;
+            if (state === 'on') {
+                const res = await fetch(API + '/viviendas/' + vid + '/interes?usuarioId=' + userId, { method: 'DELETE' });
+                if (res.ok) {
+                    misIntereses.delete(Number(vid));
+                    actualizarBotones();
+                }
             } else {
-                alert('No se ha podido marcar como interesante');
+                const res = await fetch(API + '/viviendas/' + vid + '/interes?usuarioId=' + userId, { method: 'POST' });
+                if (res.ok) {
+                    misIntereses.add(Number(vid));
+                    actualizarBotones();
+                }
             }
         } catch (e) {
-            alert('Error al marcar interés');
+            alert('Error al actualizar interés');
         }
     }
+
+    async function getRelacion(userId, otroId) {
+        if (!userId || !otroId || userId == otroId) return {tipo: 'self'};
+        try {
+            const res = await fetch(API + '/usuarios/' + userId + '/matches');
+            const matches = await res.json();
+            for (const m of matches) {
+                if (m.con && m.con.id == otroId && m.estado === 'MATCH') return {tipo: 'match'};
+            }
+            // Comprobar si ya le di like/pass
+            try {
+                const dres = await fetch(API + '/usuarios/' + userId + '/discover');
+                const disc = await dres.json();
+                // No está en discover si ya fue valorado
+            } catch (e) {}
+            // Intentar saber con swipes: mirar si existe relación consultando mensajes? o simplemente decir desconocido
+            try {
+                const cres = await fetch(API + '/usuarios/' + userId + '/mensajes/' + otroId);
+                if (cres.ok) return {tipo: 'match'}; // si hay conversación con match debería permitir
+            } catch (e) {}
+        } catch (e) {}
+        return {tipo: 'none'};
+    }
+
+    async function cargarInteresados() {
+        const lists = document.querySelectorAll('.interesados-list');
+        const currentUser = sel.value;
+        for (const list of lists) {
+            const vid = list.getAttribute('data-vid');
+            try {
+                const usersRes = await fetch(API + '/usuarios');
+                const users = await usersRes.json();
+                const interesados = [];
+                for (const u of users) {
+                    try {
+                        const ir = await fetch(API + '/viviendas/intereses/ids?usuarioId=' + u.id);
+                        const ids = await ir.json();
+                        if (ids.includes(Number(vid))) interesados.push(u);
+                    } catch (e) {}
+                }
+                if (interesados.length === 0) {
+                    list.innerHTML = '<span class="muted">Nadie le ha dado me gusta aún</span>';
+                } else {
+                    const items = [];
+                    for (const u of interesados) {
+                        let badge = '';
+                        if (currentUser && Number(currentUser) === Number(u.id)) {
+                            badge = '<span style="font-size:.75rem;color:var(--muted);">Tú</span>';
+                        } else if (currentUser) {
+                            try {
+                                const mres = await fetch(API + '/usuarios/' + currentUser + '/matches');
+                                const matches = await mres.json();
+                                let esMatch = false;
+                                for (const m of matches) {
+                                    if (m.con && m.con.id == u.id) { esMatch = true; break; }
+                                }
+                                if (esMatch) badge = '<span style="font-size:.75rem;background:#dcfce7;color:#166534;padding:2px 8px;border-radius:999px;">Match</span>';
+                                else badge = '<span style="font-size:.75rem;background:#f3f4f6;color:var(--muted);padding:2px 8px;border-radius:999px;">Sin match</span>';
+                            } catch (e) {
+                                badge = '<span style="font-size:.75rem;color:var(--muted);">-</span>';
+                            }
+                        }
+                        items.push('<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;"><a href="/ui/usuarios/' + u.id + '" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;"><img src="' + (u.foto||'') + '" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" onerror="this.src=\'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.nombre) + '&size=56\'"><span style="font-size:.88rem;">' + u.nombre + '</span></a>' + badge + '</div>');
+                    }
+                    list.innerHTML = items.join('');
+                }
+            } catch (e) {
+                list.innerHTML = '<span class="muted">No disponible</span>';
+            }
+        }
+    }
+
+    sel.addEventListener('change', async () => {
+        await cargarMisIntereses();
+        actualizarBotones();
+    });
+
+    document.querySelectorAll('.interesados').forEach(d => {
+        d.addEventListener('toggle', function() {
+            if (this.open) cargarInteresados();
+        });
+    });
+
     loadUsers();
 </script>
 </body>
