@@ -21,7 +21,21 @@
                 </div>
                 <div>
                     <label for="ciudad">Ciudad / Ubicación</label>
-                    <input id="ciudad" type="text" th:field="*{ciudad}" placeholder="Madrid">
+                    <select id="ciudad" th:field="*{ciudad}">
+                        <option value="Madrid">Madrid</option>
+                        <option value="Barcelona">Barcelona</option>
+                        <option value="Valencia">Valencia</option>
+                        <option value="Sevilla">Sevilla</option>
+                        <option value="Bilbao">Bilbao</option>
+                        <option value="Málaga">Málaga</option>
+                        <option value="Zaragoza">Zaragoza</option>
+                        <option value="Alicante">Alicante</option>
+                        <option value="Granada">Granada</option>
+                        <option value="Salamanca">Salamanca</option>
+                        <option value="Palma de Mallorca">Palma de Mallorca</option>
+                        <option value="Las Palmas de Gran Canaria">Las Palmas de Gran Canaria</option>
+                        <option value="Otro">Otro</option>
+                    </select>
                     <div class="field-error" th:if="${#fields.hasErrors('ciudad')}" th:errors="*{ciudad}"></div>
                 </div>
             </div>
