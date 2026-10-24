@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PisoMatch</title>
+    <style>
+        :root {
+            --bg: #f3f4f6; --card: #fff; --ink: #1f2937; --muted: #6b7280;
+            --like: #22c55e; --nope: #ef4444; --brand: #ff5a5f; --border: #e5e7eb;
+            --shadow: 0 12px 30px rgba(0, 0, 0, .12);
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+               background: var(--bg); color: var(--ink); min-height: 100vh;
+               display: flex; flex-direction: column; align-items: center; }
+        header { width: 100%; background: var(--brand); color: #fff; padding: 14px 16px;
+                 display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        header h1 { font-size: 1.25rem; margin: 0; letter-spacing: .5px; }
+        header h1 span { opacity: .85; font-weight: 400; }
+        .who { display: flex; align-items: center; gap: 10px; font-size: .9rem; }
+        .who a { color: #fff; font-size: .9rem; }
+        select { border: none; border-radius: 8px; padding: 6px 10px; font-size: .9rem;
+                 background: #fff; color: var(--ink); }
+        main { width: 100%; max-width: 420px; padding: 16px; flex: 1; }
+        .deck { position: relative; height: 520px; }
+        .card { position: absolute; inset: 0; background: var(--card); border-radius: 18px;
+                box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; }
+        .card .photo { flex: 1; background-size: cover; background-position: center;
+                       background-color: #ddd; position: relative; }
+        .badge { position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,.55);
+                 color: #fff; padding: 6px 10px; border-radius: 999px; font-size: .8rem; font-weight: 600; }
+        .badge.high { background: var(--like); } .badge.mid { background: #f59e0b; }
+        .card .info { padding: 14px 16px 18px; }
+        .card .info h2 { margin: 0 0 4px; font-size: 1.3rem; }
+        .card .info h2 small { color: var(--muted); font-weight: 400; }
+        .card .info .place { color: var(--muted); font-size: .9rem; margin-bottom: 8px; }
+        .card .info .bio { font-size: .92rem; line-height: 1.35; margin-bottom: 10px; }
+        .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { font-size: .78rem; background: #f3f4f6; border: 1px solid var(--border);
+               border-radius: 999px; padding: 3px 9px; }
+        .empty { position: absolute; inset: 0; display: flex; flex-direction: column;
+                 align-items: center; justify-content: center; text-align: center;
+                 color: var(--muted); padding: 24px; }
+        .actions { display: flex; justify-content: center; gap: 28px; margin-top: 18px; }
+        .actions button { width: 68px; height: 68px; border-radius: 50%; border: none;
+                          font-size: 1.8rem; cursor: pointer; box-shadow: var(--shadow);
+                          background: #fff; transition: transform .1s ease; }
+        .actions button:hover { transform: scale(1.08); }
+        .actions button:disabled { opacity: .4; cursor: default; transform: none; }
+        .actions .nope { color: var(--nope); } .actions .like { color: var(--like); }
+        .matches { margin-top: 28px; }
+        .matches h3 { font-size: 1rem; margin: 0 0 10px; }
+        .match-list { display: flex; flex-direction: column; gap: 8px; }
+        .match-row { display: flex; align-items: center; gap: 12px; background: #fff;
+                     border-radius: 12px; padding: 8px 12px; box-shadow: 0 2px 8px rgba(0,0,0,.05);
+                     cursor: pointer; }
+        .match-row:hover { background: #fafafa; }
+        .match-row img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+        .match-row .m-name { font-weight: 600; }
+        .match-row .m-sub { font-size: .82rem; color: var(--muted); }
+        .match-row .chat-hint { margin-left: auto; color: var(--brand); font-size: .85rem; }
+        .no-matches { color: var(--muted); font-size: .9rem; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(255,90,95,.95); color: #fff;
+                   display: none; flex-direction: column; align-items: center; justify-content: center;
+                   text-align: center; padding: 24px; z-index: 10; }
+        .overlay.show { display: flex; }
+        .overlay h2 { font-size: 2.2rem; margin: 0 0 8px; }
+        .overlay img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
+                       border: 4px solid #fff; margin: 16px 0; }
+        .overlay button { margin-top: 20px; background: #fff; color: var(--brand); border: none;
+                          border-radius: 999px; padding: 12px 28px; font-size: 1rem;
+                          font-weight: 600; cursor: pointer; }
+
+        /* Chat */
+        .chat { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none;
+                align-items: flex-end; justify-content: center; z-index: 11; }
+        .chat.show { display: flex; }
+        .chat-box { background: var(--bg); width: 100%; max-width: 420px; height: 80vh;
+                    border-radius: 18px 18px 0 0; display: flex; flex-direction: column; overflow: hidden; }
+        .chat-head { background: var(--brand); color: #fff; padding: 12px 16px; display: flex;
+                     align-items: center; gap: 10px; }
+        .chat-head img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        .chat-head .name { font-weight: 600; flex: 1; }
+        .chat-head button { background: transparent; border: none; color: #fff; font-size: 1.4rem;
+                            cursor: pointer; }
+        .chat-msgs { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+        .msg { max-width: 75%; padding: 8px 12px; border-radius: 14px; font-size: .92rem; line-height: 1.3; }
+        .msg.mine { align-self: flex-end; background: var(--brand); color: #fff; border-bottom-right-radius: 4px; }
+        .msg.theirs { align-self: flex-start; background: #fff; border: 1px solid var(--border);
+                      border-bottom-left-radius: 4px; }
+        .chat-form { display: flex; gap: 8px; padding: 10px; background: #fff; border-top: 1px solid var(--border); }
+        .chat-form input { flex: 1; border: 1px solid var(--border); border-radius: 999px;
+                           padding: 10px 14px; font-size: .95rem; }
+        .chat-form button { background: var(--brand); color: #fff; border: none; border-radius: 999px;
+                            padding: 0 18px; font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Piso<span>Match</span> 🏠</h1>
+        <div class="who">
+            <a href="/ui/usuarios">Ver usuarios ↗</a>
+            <label for="me">Eres:</label>
+            <select id="me"></select>
+        </div>
+    </header>
+
+    <main>
+        <div class="deck" id="deck"></div>
+
+        <div class="actions">
+            <button class="nope" id="btn-nope" title="Pasar">✕</button>
+            <button class="like" id="btn-like" title="Me interesa">♥</button>
+        </div>
+
+        <section class="matches">
+            <h3>Tus matches <span style="font-weight:400;color:var(--muted);font-size:.85rem;">(toca para chatear)</span></h3>
+            <div class="match-list" id="matches"></div>
+        </section>
+    </main>
+
+    <div class="overlay" id="overlay">
+        <h2>¡Es un match! 🎉</h2>
+        <p id="overlay-text"></p>
+        <img id="overlay-img" alt="">
+        <button id="overlay-close">Seguir buscando</button>
+    </div>
+
+    <div class="chat" id="chat">
+        <div class="chat-box">
+            <div class="chat-head">
+                <img id="chat-img" alt="">
+                <span class="name" id="chat-name">Chat</span>
+                <button id="chat-close">✕</button>
+            </div>
+            <div class="chat-msgs" id="chat-msgs"></div>
+            <form class="chat-form" id="chat-form">
+                <input id="chat-input" placeholder="Escribe un mensaje..." autocomplete="off">
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API = '/api/v1';
+        const $ = (id) => document.getElementById(id);
+
+        let meId = null;
+        let queue = [];
+        let chatWith = null;
+
+        async function api(path, options) {
+            const res = await fetch(API + path, {
+                headers: { 'Content-Type': 'application/json' }, ...options,
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ message: res.statusText }));
+                throw new Error(err.message || 'Error');
+            }
+            return res.status === 204 ? null : res.json();
+        }
+
+        async function loadPeople() {
+            const people = await api('/usuarios');
+            const sel = $('me');
+            sel.innerHTML = '';
+            people.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.id;
+                opt.textContent = `${u.nombre}` + (u.profesion ? ` · ${u.profesion}` : '');
+                sel.appendChild(opt);
+            });
+            meId = people.length ? people[0].id : null;
+            sel.value = meId;
+        }
+
+        function tagsFor(perfil) {
+            if (!perfil) return ['Sin perfil de convivencia'];
+            const tags = [`💶 ${perfil.presupuesto}€/mes`, `📍 ${perfil.ciudad}`];
+            if (perfil.fechaEntrada) tags.push(`📅 ${perfil.fechaEntrada}`);
+            if (perfil.habitos) tags.push(`🏷 ${perfil.habitos}`);
+            return tags;
+        }
+
+        function badgeClass(score) {
+            if (score >= 70) return 'high';
+            if (score >= 40) return 'mid';
+            return '';
+        }
+
+        function renderDeck() {
+            const deck = $('deck');
+            deck.innerHTML = '';
+            if (queue.length === 0) {
+                deck.innerHTML = '<div class="empty"><p>No hay más usuarios por ahora.<br>¡Vuelve más tarde o cambia de usuario!</p></div>';
+                setButtons(false);
+                return;
+            }
+            const top = Math.min(2, queue.length);
+            for (let i = top - 1; i >= 0; i--) {
+                const c = queue[i];
+                const u = c.usuario;
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.transform = `scale(${1 - i * 0.03}) translateY(${i * -8}px)`;
+                card.innerHTML = `
+                    <div class="photo" style="background-image:url('${u.foto || ''}')">
+                        <span class="badge ${badgeClass(c.compatibilidad)}">${c.compatibilidad}% compatible</span>
+                    </div>
+                    <div class="info">
+                        <h2>${u.nombre} <small>${u.edad}</small></h2>
+                        <div class="place">${u.profesion || ''}</div>
+                        <div class="bio">${u.descripcion || ''}</div>
+                        <div class="tags">${tagsFor(c.perfil).map(t => `<span class="tag">${t}</span>`).join('')}</div>
+                    </div>`;
+                deck.appendChild(card);
+            }
+            setButtons(true);
+        }
+
+        function setButtons(enabled) {
+            $('btn-like').disabled = !enabled;
+            $('btn-nope').disabled = !enabled;
+        }
+
+        async function loadDeck() {
+            if (!meId) return;
+            queue = await api(`/usuarios/${meId}/discover`);
+            renderDeck();
+        }
+
+        async function loadMatches() {
+            if (!meId) return;
+            const matches = await api(`/usuarios/${meId}/matches`);
+            const list = $('matches');
+            if (matches.length === 0) {
+                list.innerHTML = '<div class="no-matches">Aún no tienes matches. ¡Empieza a deslizar!</div>';
+                return;
+            }
+            list.innerHTML = '';
+            matches.forEach(m => {
+                const row = document.createElement('div');
+                row.className = 'match-row';
+                row.innerHTML = `
+                    <img src="${m.con.foto || ''}" alt="">
+                    <div>
+                        <div class="m-name">${m.con.nombre}, ${m.con.edad}</div>
+                        <div class="m-sub">${m.con.profesion || ''}</div>
+                    </div>
+                    <span class="chat-hint">💬 Chatear</span>`;
+                row.onclick = () => openChat(m.con);
+                list.appendChild(row);
+            });
+        }
+
+        async function swipe(liked) {
+            if (queue.length === 0) return;
+            const current = queue.shift();
+            setButtons(false);
+            renderDeck();
+            try {
+                const result = await api(`/usuarios/${meId}/swipes`, {
+                    method: 'POST',
+                    body: JSON.stringify({ objetivoId: current.usuario.id, liked }),
+                });
+                if (result.matched) {
+                    showMatch(result.matchedWith);
+                    loadMatches();
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                if (queue.length > 0) setButtons(true);
+            }
+        }
+
+        function showMatch(usuario) {
+            $('overlay-text').textContent = `Tú y ${usuario.nombre} os habéis gustado.`;
+            $('overlay-img').src = usuario.foto || '';
+            $('overlay').classList.add('show');
+        }
+
+        // --- Chat ---
+        async function openChat(usuario) {
+            chatWith = usuario;
+            $('chat-name').textContent = usuario.nombre;
+            $('chat-img').src = usuario.foto || '';
+            $('chat').classList.add('show');
+            await loadConversation();
+        }
+
+        async function loadConversation() {
+            const msgs = await api(`/usuarios/${meId}/mensajes/${chatWith.id}`);
+            const box = $('chat-msgs');
+            box.innerHTML = msgs.map(m => {
+                const mine = m.emisorId === meId;
+                return `<div class="msg ${mine ? 'mine' : 'theirs'}">${escapeHtml(m.contenido)}</div>`;
+            }).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function escapeHtml(s) {
+            return s.replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+        }
+
+        $('chat-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const input = $('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            try {
+                await api(`/usuarios/${meId}/mensajes`, {
+                    method: 'POST',
+                    body: JSON.stringify({ receptorId: chatWith.id, contenido: text }),
+                });
+                await loadConversation();
+            } catch (err) {
+                alert(err.message);
+            }
+        };
+
+        $('chat-close').onclick = () => $('chat').classList.remove('show');
+        $('overlay-close').onclick = () => $('overlay').classList.remove('show');
+        $('btn-like').onclick = () => swipe(true);
+        $('btn-nope').onclick = () => swipe(false);
+        $('me').onchange = (e) => {
+            meId = Number(e.target.value);
+            loadDeck();
+            loadMatches();
+        };
+
+        (async function init() {
+            await loadPeople();
+            await loadDeck();
+            await loadMatches();
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: pisomatch
+
+  # Base de datos H2 en memoria: arranca sola y se reinicia en cada ejecución
+  datasource:
+    url: jdbc:h2:mem:pisomatch;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+server:
+  port: 8080
+
+# Endpoints de observabilidad expuestos por Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

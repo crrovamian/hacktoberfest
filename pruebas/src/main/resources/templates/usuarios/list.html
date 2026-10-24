@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head}"></head>
+<body>
+<header th:replace="~{fragments/common :: header}"></header>
+
+<div class="container">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <h2 class="section" style="margin:0;">Usuarios
+            (<span th:text="${#lists.size(usuarios)}">0</span>)</h2>
+        <a class="btn" th:href="@{/ui/usuarios/new}">+ Nuevo usuario</a>
+    </div>
+
+    <p th:if="${#lists.isEmpty(usuarios)}" class="muted">Todavía no hay usuarios. ¡Crea el primero!</p>
+
+    <div class="grid">
+        <a class="pcard" th:each="u : ${usuarios}" th:href="@{/ui/usuarios/{id}(id=${u.id})}">
+            <div class="photo" th:style="'background-image:url(' + ${u.foto} + ')'"></div>
+            <div class="body">
+                <h3><span th:text="${u.nombre}">Nombre</span>,
+                    <span th:text="${u.edad}">0</span></h3>
+                <div class="place" th:text="${u.profesion}">Profesión</div>
+                <p class="muted" style="font-size:.85rem; margin:6px 0 0;"
+                   th:text="${u.descripcion}">Descripción</p>
+            </div>
+        </a>
+    </div>
+</div>
+</body>
+</html>

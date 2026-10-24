@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head}"></head>
+<body>
+<header th:replace="~{fragments/common :: header}"></header>
+
+<div class="container">
+    <p><a th:href="@{/ui/usuarios}">&larr; Volver a usuarios</a></p>
+
+    <div class="detail-head">
+        <img th:src="${usuario.foto}" alt="foto">
+        <div>
+            <h2><span th:text="${usuario.nombre}">Nombre</span>,
+                <span th:text="${usuario.edad}">0</span></h2>
+            <div class="place" th:text="${usuario.profesion}">Profesión</div>
+            <p th:text="${usuario.descripcion}" class="muted" style="margin:8px 0 0;">bio</p>
+        </div>
+    </div>
+
+    <!-- Perfil de convivencia -->
+    <h2 class="section">Perfil de convivencia</h2>
+    <div class="card-panel" style="margin-bottom:24px;">
+        <div th:if="${perfil == null}" class="muted">Sin perfil de convivencia.</div>
+        <div th:if="${perfil != null}">
+            <div class="tags">
+                <span class="tag" th:text="'💶 ' + ${perfil.presupuesto} + '€/mes'">€</span>
+                <span class="tag" th:text="'📍 ' + ${perfil.ciudad}">Ciudad</span>
+                <span class="tag" th:if="${perfil.fechaEntrada != null}"
+                      th:text="'📅 Entra el ' + ${#temporals.format(perfil.fechaEntrada, 'dd/MM/yyyy')}">fecha</span>
+            </div>
+            <p style="margin:12px 0 0;"><strong>Hábitos:</strong>
+                <span th:text="${perfil.habitos}">—</span></p>
+            <p style="margin:6px 0 0;"><strong>Preferencias:</strong>
+                <span th:text="${perfil.preferencias}">—</span></p>
+        </div>
+    </div>
+
+    <!-- Preferencias de búsqueda -->
+    <h2 class="section">Preferencias de búsqueda</h2>
+    <div class="card-panel" style="margin-bottom:24px;">
+        <div th:if="${preferencias == null}" class="muted">Sin preferencias de búsqueda.</div>
+        <div th:if="${preferencias != null}" class="tags">
+            <span class="tag" th:text="'💶 ' + ${preferencias.presupuestoMinimo} + '–' + ${preferencias.presupuestoMaximo} + '€'">€</span>
+            <span class="tag" th:text="'🔎 Zona: ' + ${preferencias.zonaDeseada}">zona</span>
+        </div>
+    </div>
+
+    <!-- Viviendas publicadas -->
+    <h2 class="section">Viviendas publicadas (<span th:text="${#lists.size(viviendas)}">0</span>)</h2>
+    <div class="card-panel" th:if="${#lists.isEmpty(viviendas)}" style="margin-bottom:24px;">
+        <span class="muted">No ha publicado viviendas.</span>
+    </div>
+    <div class="row" th:each="v : ${viviendas}">
+        <div style="flex:1;">
+            <strong th:text="${v.zona}">Zona</strong>
+            <div class="meta" th:text="${v.direccion} + ' · ' + ${v.habitaciones} + ' hab.'">dir</div>
+        </div>
+        <span class="score" th:text="${v.precio} + '€'">0€</span>
+    </div>
+
+    <!-- Matches -->
+    <h2 class="section" style="margin-top:28px;">Matches (<span th:text="${#lists.size(matches)}">0</span>)</h2>
+    <div class="card-panel" th:if="${#lists.isEmpty(matches)}">
+        <span class="muted">Aún no tiene matches.</span>
+    </div>
+    <div th:each="m : ${matches}" class="row">
+        <img th:src="${m.con().foto()}" alt="">
+        <div>
+            <a th:href="@{/ui/usuarios/{id}(id=${m.con().id()})}"
+               th:text="${m.con().nombre()} + ', ' + ${m.con().edad()}">Match</a>
+            <div class="meta" th:text="${m.con().profesion()}">Profesión</div>
+        </div>
+    </div>
+
+    <!-- Candidatos más compatibles -->
+    <h2 class="section" style="margin-top:28px;">Candidatos más compatibles</h2>
+    <div class="card-panel" th:if="${#lists.isEmpty(candidatos)}">
+        <span class="muted">No hay candidatos pendientes por descubrir.</span>
+    </div>
+    <div th:each="c : ${candidatos}" class="row">
+        <img th:src="${c.usuario().foto()}" alt="">
+        <div style="flex:1;">
+            <a th:href="@{/ui/usuarios/{id}(id=${c.usuario().id()})}"
+               th:text="${c.usuario().nombre()} + ', ' + ${c.usuario().edad()}">Candidato</a>
+            <div class="meta" th:text="${c.usuario().profesion()}">Profesión</div>
+        </div>
+        <span class="score" th:text="${c.compatibilidad()} + '%'">0%</span>
+    </div>
+</div>
+</body>
+</html>

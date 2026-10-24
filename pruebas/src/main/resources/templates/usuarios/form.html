@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head}"></head>
+<body>
+<header th:replace="~{fragments/common :: header}"></header>
+
+<div class="container" style="max-width:640px;">
+    <p><a th:href="@{/ui/usuarios}">&larr; Volver a usuarios</a></p>
+    <h2 class="section">Nuevo usuario</h2>
+
+    <div class="card-panel">
+        <form class="profile" method="post" th:action="@{/ui/usuarios}" th:object="${usuarioForm}">
+            <label>Nombre</label>
+            <input type="text" th:field="*{nombre}" placeholder="Tu nombre">
+            <div class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+
+            <div class="two">
+                <div>
+                    <label>Edad</label>
+                    <input type="number" th:field="*{edad}">
+                    <div class="field-error" th:if="${#fields.hasErrors('edad')}" th:errors="*{edad}"></div>
+                </div>
+                <div>
+                    <label>Profesión</label>
+                    <input type="text" th:field="*{profesion}" placeholder="p. ej. Diseñadora">
+                </div>
+            </div>
+
+            <label>Foto (URL)</label>
+            <input type="text" th:field="*{foto}" placeholder="https://i.pravatar.cc/500?img=1">
+
+            <label>Descripción</label>
+            <textarea rows="3" th:field="*{descripcion}" placeholder="Cuéntate un poco..."></textarea>
+            <div class="field-error" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></div>
+
+            <p class="muted" style="font-size:.82rem; margin-top:14px;">
+                Tras crearlo podrás añadir su perfil de convivencia y preferencias desde la API.</p>
+
+            <div style="margin-top:12px; display:flex; gap:12px;">
+                <button type="submit" class="btn">Crear usuario</button>
+                <a th:href="@{/ui/usuarios}" class="btn secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
