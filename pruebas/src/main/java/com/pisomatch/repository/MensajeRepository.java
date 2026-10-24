@@ -10,4 +10,10 @@ public interface MensajeRepository extends JpaRepository<Mensaje, Long> {
     /** Conversación entre dos usuarios (en ambos sentidos), ordenada cronológicamente. */
     List<Mensaje> findByEmisorIdInAndReceptorIdInOrderByFechaAsc(
             List<Long> emisores, List<Long> receptores);
+
+    long countByReceptorIdAndLeidoFalse(Long receptorId);
+
+    long countByReceptorIdAndEmisorIdAndLeidoFalse(Long receptorId, Long emisorId);
+
+    List<Mensaje> findByReceptorIdAndEmisorIdAndLeidoFalse(Long receptorId, Long emisorId);
 }

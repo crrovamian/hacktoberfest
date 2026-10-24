@@ -5,14 +5,21 @@
 <header th:replace="~{fragments/common :: header}"></header>
 
 <div class="container">
-    <h2 class="section">Viviendas (<span th:text="${#lists.size(viviendas)}">0</span>)</h2>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; gap:16px; flex-wrap: wrap;">
+        <div>
+            <h2 class="section" style="margin:0;">Viviendas
+                (<span th:text="${#lists.size(viviendas)}">0</span>)</h2>
+            <p class="muted" style="margin:6px 0 0;">Habitaciones disponibles publicadas por los usuarios.</p>
+        </div>
+        <a class="btn" th:href="@{/ui/usuarios}">Ver usuarios</a>
+    </div>
 
     <p th:if="${#lists.isEmpty(viviendas)}" class="muted">Todavía no hay viviendas publicadas.</p>
 
     <div class="grid">
-        <div class="pcard" th:each="v : ${viviendas}">
+        <article class="pcard" th:each="v : ${viviendas}">
             <div class="photo"
-                 th:style="${#lists.isEmpty(v.fotos)} ? '' : 'background-image:url(' + ${v.fotos[0]} + ')'"></div>
+                 th:style="(${v.fotos} != null and !#lists.isEmpty(v.fotos) and ${v.fotos[0]} != null and !#strings.isEmpty(${v.fotos[0]})) ? 'background-image:url(' + ${v.fotos[0]} + ')' : 'background-image:linear-gradient(135deg,#fecaca,#f8fafc)'"></div>
             <div class="body">
                 <h3 th:text="${v.zona}">Zona</h3>
                 <div class="place" th:text="${v.direccion}">Dirección</div>
@@ -20,13 +27,13 @@
                     <span class="tag" th:text="'💶 ' + ${v.precio} + '€/mes'">€</span>
                     <span class="tag" th:text="'🛏 ' + ${v.habitaciones} + ' hab.'">hab</span>
                 </div>
-                <div class="meta" style="margin-top:8px; font-size:.82rem;">
+                <div class="meta" style="margin-top:8px; font-size:.88rem; color:var(--muted);">
                     Propietario:
                     <a th:href="@{/ui/usuarios/{id}(id=${v.propietarioId})}"
                        th:text="'#' + ${v.propietarioId}">#0</a>
                 </div>
             </div>
-        </div>
+        </article>
     </div>
 </div>
 </body>

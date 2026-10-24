@@ -22,6 +22,12 @@
         header h1 span { opacity: .9; font-weight: 400; }
         .who { display: flex; align-items: center; gap: 10px; font-size: .9rem; flex-wrap: wrap; justify-content: flex-end; }
         .who a { color: #fff; font-size: .9rem; }
+        .notif-btn { position: relative; border: none; background: rgba(255,255,255,.18); color: #fff; border-radius: 999px;
+                     width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
+        .notif-btn:hover { background: rgba(255,255,255,.28); }
+        .notif-badge { position: absolute; top: -4px; right: -4px; background: #fff; color: var(--brand); border-radius: 999px;
+                       font-size: .75rem; font-weight: 700; padding: 0 6px; min-width: 20px; text-align: center; }
+        .notif-badge[hidden] { display: none; }
         select { border: none; border-radius: 8px; padding: 6px 10px; font-size: .9rem;
                  background: #fff; color: var(--ink); }
         main { width: 100%; max-width: 420px; padding: 16px; flex: 1; }
@@ -71,9 +77,11 @@
         .match-row:hover { background: #fafafa; }
         .match-row:focus-visible { border-color: #2563eb; }
         .match-row img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #e5e7eb; }
+        .match-row .m-info { flex: 1; display: flex; flex-direction: column; }
         .match-row .m-name { font-weight: 600; }
         .match-row .m-sub { font-size: .82rem; color: var(--muted); }
-        .match-row .chat-hint { margin-left: auto; color: var(--brand); font-size: .85rem; }
+        .match-row .chat-hint { margin-left: auto; color: var(--brand); font-size: .85rem; display: flex; align-items: center; gap: 8px; }
+        .unread-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--brand); }
         .no-matches { color: var(--muted); font-size: .9rem; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
@@ -144,6 +152,10 @@
         <h1>Piso<span>Match</span> 🏠</h1>
         <div class="who">
             <a href="/ui/usuarios">Ver usuarios ↗</a>
+            <button type="button" id="notif-btn" class="notif-btn" aria-label="Mensajes sin leer">
+                💬
+                <span id="notif-badge" class="notif-badge" hidden>0</span>
+            </button>
             <div>
                 <label for="me">Eres:</label>
                 <select id="me"></select>
@@ -206,6 +218,8 @@
         const history = [];
         let lastFocused = null;
         let toastTimer = null;
+        const unread = new Map();
+        let unreadPoll = null;
 
         async function api(path, options) {
             const res = await fetch(API + path, {
@@ -311,6 +325,28 @@
             renderDeck();
         }
 
+        async function refreshUnread() {
+            if (!meId) return;
+            try {
+                const res = await api(`/usuarios/${meId}/mensajes/sin-leer`);
+                const total = res.total || 0;
+                const badge = $('notif-badge');
+                if (total > 0) {
+                    badge.textContent = total > 9 ? '9+' : total;
+                    badge.hidden = false;
+                } else {
+                    badge.hidden = true;
+                }
+                for (const m of document.querySelectorAll('.match-row')) {
+                    const id = m.dataset.userId;
+                    const dot = m.querySelector('.unread-dot');
+                    if (dot) dot.hidden = !(unread.get(Number(id)) > 0);
+                }
+            } catch (e) {
+                // ignore
+            }
+        }
+
         async function loadMatches() {
             if (!meId) return;
             try {
@@ -318,24 +354,37 @@
                 const list = $('matches');
                 if (matches.length === 0) {
                     list.innerHTML = '<div class="no-matches">Aún no tienes matches. ¡Empieza a deslizar!</div>';
+                    await refreshUnread();
                     return;
                 }
+                const unreadMap = new Map();
+                await Promise.all(matches.map(async m => {
+                    try {
+                        const r = await api(`/usuarios/${meId}/mensajes/sin-leer/${m.con.id}`);
+                        if (r.total > 0) unreadMap.set(m.con.id, r.total);
+                    } catch (e) {}
+                }));
+                unread.clear();
+                for (const [k,v] of unreadMap) unread.set(k,v);
                 list.innerHTML = '';
                 matches.forEach(m => {
                     const row = document.createElement('button');
                     row.className = 'match-row';
                     row.type = 'button';
+                    row.dataset.userId = m.con.id;
                     row.setAttribute('aria-label', `Chatear con ${m.con.nombre}, ${m.con.edad}`);
+                    const hasUnread = unread.get(m.con.id) > 0;
                     row.innerHTML = `
                         <img src="${m.con.foto || ''}" alt="" loading="lazy" width="44" height="44">
-                        <div>
+                        <div class="m-info">
                             <div class="m-name">${escapeHtml(m.con.nombre)}, ${m.con.edad}</div>
                             <div class="m-sub">${escapeHtml(m.con.profesion || '')}</div>
                         </div>
-                        <span class="chat-hint">💬 Chatear</span>`;
+                        <span class="chat-hint"><span class="unread-dot" ${hasUnread ? '' : 'hidden'}></span>💬 Chatear</span>`;
                     row.onclick = () => openChat(m.con);
                     list.appendChild(row);
                 });
+                await refreshUnread();
             } catch (e) {
                 $('matches').innerHTML = '<div class="no-matches">No se han podido cargar los matches.</div>';
             }
@@ -405,7 +454,10 @@
             document.body.style.overflow = 'hidden';
             lastFocused = document.activeElement;
             setTimeout(() => $('chat-input').focus(), 50);
+            unread.delete(usuario.id);
             await loadConversation();
+            await loadMatches();
+            await refreshUnread();
         }
 
         async function loadConversation() {
@@ -414,9 +466,11 @@
                 const box = $('chat-msgs');
                 box.innerHTML = msgs.map(m => {
                     const mine = m.emisorId === meId;
-                    return `<div class="msg ${mine ? 'mine' : 'theirs'}">${escapeHtml(m.contenido)}</div>`;
+                    const leido = mine && m.leido ? ' · leído' : '';
+                    return `<div class="msg ${mine ? 'mine' : 'theirs'}">${escapeHtml(m.contenido)}<div style="font-size:.72rem;opacity:.7;margin-top:4px;text-align:right;">${new Date(m.fecha).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}${leido}</div></div>`;
                 }).join('');
                 box.scrollTop = box.scrollHeight;
+                await refreshUnread();
             } catch (e) {
                 showToast('No se ha podido cargar la conversación');
             }
@@ -457,6 +511,8 @@
             chat.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
             if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+            loadMatches();
+            refreshUnread();
         }
 
         function closeOverlay() {
@@ -478,6 +534,11 @@
                 closeOverlay();
             }
         };
+        $('notif-btn').onclick = () => {
+            const first = document.querySelector('.match-row');
+            if (first) first.click();
+            else showToast('No tienes matches con mensajes sin leer');
+        };
         $('btn-like').onclick = () => swipe(true);
         $('btn-nope').onclick = () => swipe(false);
         $('btn-undo').onclick = undo;
@@ -485,8 +546,11 @@
             meId = Number(e.target.value);
             history.length = 0;
             $('btn-undo').disabled = true;
+            unread.clear();
             loadDeck();
             loadMatches();
+            if (unreadPoll) clearInterval(unreadPoll);
+            unreadPoll = setInterval(refreshUnread, 15000);
         };
 
         document.addEventListener('keydown', (e) => {
@@ -505,6 +569,8 @@
             await loadPeople();
             await loadDeck();
             await loadMatches();
+            if (unreadPoll) clearInterval(unreadPoll);
+            unreadPoll = setInterval(refreshUnread, 15000);
         })();
     </script>
 </body>

@@ -5,15 +5,14 @@
 <header th:replace="~{fragments/common :: header}"></header>
 
 <div class="container">
-    <p><a th:href="@{/ui/usuarios}">&larr; Volver a usuarios</a></p>
+    <p style="margin-top:0;"><a th:href="@{/ui/usuarios}">&larr; Volver a usuarios</a></p>
 
     <div class="detail-head">
-        <img th:src="${usuario.foto}" alt="foto">
+        <img th:src="${usuario.foto != null and !#strings.isEmpty(usuario.foto)} ? ${usuario.foto} : 'https://ui-avatars.com/api/?name=' + ${usuario.nombre} + '&background=fda4af&color=1f2937&size=240'" alt="Foto de perfil">
         <div>
-            <h2><span th:text="${usuario.nombre}">Nombre</span>,
-                <span th:text="${usuario.edad}">0</span></h2>
+            <h2><span th:text="${usuario.nombre}">Nombre</span>, <span th:text="${usuario.edad}">0</span></h2>
             <div class="place" th:text="${usuario.profesion}">Profesión</div>
-            <p th:text="${usuario.descripcion}" class="muted" style="margin:8px 0 0;">bio</p>
+            <p th:text="${usuario.descripcion}" class="muted" style="margin:10px 0 0; max-width:680px;">bio</p>
         </div>
     </div>
 
@@ -64,7 +63,7 @@
         <span class="muted">Aún no tiene matches.</span>
     </div>
     <div th:each="m : ${matches}" class="row">
-        <img th:src="${m.con().foto()}" alt="">
+        <img th:src="${m.con().foto() != null and !#strings.isEmpty(m.con().foto())} ? ${m.con().foto()} : 'https://ui-avatars.com/api/?name=' + ${m.con().nombre()} + '&background=e5e7eb&color=111827&size=104'" alt="">
         <div>
             <a th:href="@{/ui/usuarios/{id}(id=${m.con().id()})}"
                th:text="${m.con().nombre()} + ', ' + ${m.con().edad()}">Match</a>
@@ -78,7 +77,7 @@
         <span class="muted">No hay candidatos pendientes por descubrir.</span>
     </div>
     <div th:each="c : ${candidatos}" class="row">
-        <img th:src="${c.usuario().foto()}" alt="">
+        <img th:src="${c.usuario().foto() != null and !#strings.isEmpty(c.usuario().foto())} ? ${c.usuario().foto()} : 'https://ui-avatars.com/api/?name=' + ${c.usuario().nombre()} + '&background=e5e7eb&color=111827&size=104'" alt="">
         <div style="flex:1;">
             <a th:href="@{/ui/usuarios/{id}(id=${c.usuario().id()})}"
                th:text="${c.usuario().nombre()} + ', ' + ${c.usuario().edad()}">Candidato</a>

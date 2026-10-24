@@ -33,6 +33,12 @@ public class Mensaje {
     @Column(nullable = false)
     private Instant fecha;
 
+    @Column(nullable = false)
+    private boolean leido = false;
+
+    @Column(name = "fecha_lectura")
+    private Instant fechaLectura;
+
     protected Mensaje() {
         // Requerido por JPA.
     }
@@ -42,6 +48,7 @@ public class Mensaje {
         this.receptorId = receptorId;
         this.contenido = contenido;
         this.fecha = Instant.now();
+        this.leido = false;
     }
 
     public Long getId() {
@@ -62,5 +69,24 @@ public class Mensaje {
 
     public Instant getFecha() {
         return fecha;
+    }
+
+    public boolean isLeido() {
+        return leido;
+    }
+
+    public void setLeido(boolean leido) {
+        this.leido = leido;
+        if (leido && this.fechaLectura == null) {
+            this.fechaLectura = Instant.now();
+        }
+    }
+
+    public Instant getFechaLectura() {
+        return fechaLectura;
+    }
+
+    public void setFechaLectura(Instant fechaLectura) {
+        this.fechaLectura = fechaLectura;
     }
 }

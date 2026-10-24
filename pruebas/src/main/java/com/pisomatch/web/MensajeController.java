@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,4 +44,18 @@ public class MensajeController {
                 .map(MensajeResponse::from)
                 .toList();
     }
+
+    /** Número total de mensajes sin leer para el usuario {id}. */
+    @GetMapping("/sin-leer")
+    public SinLeerResponse sinLeer(@PathVariable Long id) {
+        return new SinLeerResponse(mensajeService.sinLeer(id));
+    }
+
+    /** Número de mensajes sin leer desde {emisorId}. */
+    @GetMapping("/sin-leer/{emisorId}")
+    public SinLeerResponse sinLeerDe(@PathVariable Long id, @PathVariable Long emisorId) {
+        return new SinLeerResponse(mensajeService.sinLeer(id, emisorId));
+    }
+
+    public record SinLeerResponse(long total) {}
 }

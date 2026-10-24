@@ -37,11 +37,30 @@ public class MensajeService {
         return mensajeRepository.save(new Mensaje(emisorId, receptorId, contenido));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Mensaje> conversacion(Long usuarioId, Long otroId) {
         usuarioService.getById(usuarioId);
         usuarioService.getById(otroId);
-        List<Long> ambos = List.of(usuarioId, otroId);
-        return mensajeRepository.findByEmisorIdInAndReceptorIdInOrderByFechaAsc(ambos, ambos);
+        List<Mensaje> mensajes = mensajeRepository.findByEmisorIdInAndReceptorIdInOrderByFechaAsc(
+                List.of(usuarioId, otroId), List.of(usuarioId, otroId));
+        List<Mensaje> pendientes = mensajeRepository.findByReceptorIdAndEmisorIdAndLeidoFalse(usuarioId, otroId);
+        if (!pendientes.isEmpty()) {
+            pendientes.forEach(m -> m.setLeido(true));
+            mensajeRepository.saveAll(pendientes);
+        }
+        return mensajes;
+    }
+
+    @Transactional(readOnly = true)
+    public long sinLeer(Long receptorId) {
+        usuarioService.getById(receptorId);
+        return mensajeRepository.countByReceptorIdAndLeidoFalse(receptorId);
+    }
+
+    @Transactional(readOnly = true)
+    public long sinLeer(Long receptorId, Long emisorId) {
+        usuarioService.getById(receptorId);
+        usuarioService.getById(emisorId);
+        return mensajeRepository.countByReceptorIdAndEmisorIdAndLeidoFalse(receptorId, emisorId);
     }
 }

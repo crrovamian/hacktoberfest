@@ -12,10 +12,13 @@ public record MensajeResponse(
         Long emisorId,
         Long receptorId,
         String contenido,
-        Instant fecha) {
+        Instant fecha,
+        boolean leido,
+        Instant fechaLectura) {
 
     public static MensajeResponse from(Mensaje m) {
         return new MensajeResponse(
-                m.getId(), m.getEmisorId(), m.getReceptorId(), m.getContenido(), m.getFecha());
+                m.getId(), m.getEmisorId(), m.getReceptorId(), m.getContenido(), m.getFecha(),
+                m.isLeido(), m.getFechaLectura());
     }
 }
