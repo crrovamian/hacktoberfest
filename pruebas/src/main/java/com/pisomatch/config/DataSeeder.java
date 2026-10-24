@@ -105,18 +105,18 @@ public class DataSeeder {
             ));
 
             preferencias.saveAll(List.of(
-                    new PreferenciasBusqueda(lucia.getId(), 400, 650, "Madrid"),
-                    new PreferenciasBusqueda(carlos.getId(), 400, 600, "Madrid"),
-                    new PreferenciasBusqueda(marta.getId(), 350, 550, "Madrid"),
-                    new PreferenciasBusqueda(javier.getId(), 300, 550, "Madrid"),
-                    new PreferenciasBusqueda(sofia.getId(), 500, 750, "Barcelona"),
-                    new PreferenciasBusqueda(diego.getId(), 420, 650, "Madrid"),
-                    new PreferenciasBusqueda(ana.getId(), 500, 700, "Valencia"),
-                    new PreferenciasBusqueda(pablo.getId(), 480, 650, "Valencia"),
-                    new PreferenciasBusqueda(elena.getId(), 600, 800, "Sevilla"),
-                    new PreferenciasBusqueda(marcos.getId(), 300, 480, "Madrid"),
-                    new PreferenciasBusqueda(nuria.getId(), 500, 700, "Barcelona"),
-                    new PreferenciasBusqueda(ivan.getId(), 450, 600, "Madrid")
+                    new PreferenciasBusqueda(lucia.getId(), 400, 650, "Madrid", "Sí", "No fumador", "Tranquilo", "Pocas", "Muy ordenado"),
+                    new PreferenciasBusqueda(carlos.getId(), 400, 600, "Madrid", "Sin preferencia", "Sin preferencia", "Indiferente", "Moderadas", "Normal"),
+                    new PreferenciasBusqueda(marta.getId(), 350, 550, "Madrid", "Sí", "No fumador", "Tranquilo", "Pocas", "Muy ordenado"),
+                    new PreferenciasBusqueda(javier.getId(), 300, 550, "Madrid", "No", "No fumador", "Tranquilo", "Pocas", "Normal"),
+                    new PreferenciasBusqueda(sofia.getId(), 500, 750, "Barcelona", "Sin preferencia", "Indiferente", "Sociable", "Frecuentes", "Normal"),
+                    new PreferenciasBusqueda(diego.getId(), 420, 650, "Madrid", "Sí", "Sin preferencia", "Indiferente", "Moderadas", "Normal"),
+                    new PreferenciasBusqueda(ana.getId(), 500, 700, "Valencia", "Sin preferencia", "No fumador", "Tranquilo", "Pocas", "Muy ordenado"),
+                    new PreferenciasBusqueda(pablo.getId(), 480, 650, "Valencia", "Sí", "Indiferente", "Indiferente", "Moderadas", "Normal"),
+                    new PreferenciasBusqueda(elena.getId(), 600, 800, "Sevilla", "No", "No fumador", "Tranquilo", "Pocas", "Muy ordenado"),
+                    new PreferenciasBusqueda(marcos.getId(), 300, 480, "Madrid", "Sin preferencia", "No fumador", "Tranquilo", "Pocas", "Normal"),
+                    new PreferenciasBusqueda(nuria.getId(), 500, 700, "Barcelona", "Sí", "No fumador", "Indiferente", "Moderadas", "Normal"),
+                    new PreferenciasBusqueda(ivan.getId(), 450, 600, "Madrid", "Sin preferencia", "Indiferente", "Sociable", "Moderadas", "Normal")
             ));
 
             viviendas.saveAll(List.of(

@@ -10,11 +10,18 @@ public record PreferenciasBusquedaResponse(
         Long usuarioId,
         int presupuestoMinimo,
         int presupuestoMaximo,
-        String zonaDeseada) {
+        String zonaDeseada,
+        String aceptaMascotas,
+        String fumador,
+        String nivelRuido,
+        String visitas,
+        String limpieza) {
 
     public static PreferenciasBusquedaResponse from(PreferenciasBusqueda p) {
         return new PreferenciasBusquedaResponse(
                 p.getId(), p.getUsuarioId(), p.getPresupuestoMinimo(),
-                p.getPresupuestoMaximo(), p.getZonaDeseada());
+                p.getPresupuestoMaximo(), p.getZonaDeseada(),
+                p.getAceptaMascotas(), p.getFumador(), p.getNivelRuido(),
+                p.getVisitas(), p.getLimpieza());
     }
 }

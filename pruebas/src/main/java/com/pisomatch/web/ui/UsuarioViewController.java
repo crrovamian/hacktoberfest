@@ -152,7 +152,9 @@ public class UsuarioViewController {
         model.addAttribute("usuario", usuarioService.getById(id));
         PreferenciasBusquedaRequest form = preferenciasService.findByUsuario(id)
                 .map(p -> new PreferenciasBusquedaRequest(p.getPresupuestoMinimo(),
-                        p.getPresupuestoMaximo(), p.getZonaDeseada()))
+                        p.getPresupuestoMaximo(), p.getZonaDeseada(),
+                        p.getAceptaMascotas(), p.getFumador(), p.getNivelRuido(),
+                        p.getVisitas(), p.getLimpieza()))
                 .orElse(new PreferenciasBusquedaRequest(400, 650, "Madrid"));
         model.addAttribute("preferenciasForm", form);
         model.addAttribute("usuarioId", id);

@@ -31,10 +31,16 @@ public class PreferenciasBusquedaService {
         usuarioService.getById(usuarioId); // valida que el usuario existe
         PreferenciasBusqueda prefs = repository.findByUsuarioId(usuarioId)
                 .orElseGet(() -> new PreferenciasBusqueda(usuarioId, req.presupuestoMinimo(),
-                        req.presupuestoMaximo(), req.zonaDeseada()));
+                        req.presupuestoMaximo(), req.zonaDeseada(),
+                        req.aceptaMascotas(), req.fumador(), req.nivelRuido(), req.visitas(), req.limpieza()));
         prefs.setPresupuestoMinimo(req.presupuestoMinimo());
         prefs.setPresupuestoMaximo(req.presupuestoMaximo());
         prefs.setZonaDeseada(req.zonaDeseada());
+        prefs.setAceptaMascotas(req.aceptaMascotas());
+        prefs.setFumador(req.fumador());
+        prefs.setNivelRuido(req.nivelRuido());
+        prefs.setVisitas(req.visitas());
+        prefs.setLimpieza(req.limpieza());
         return repository.save(prefs);
     }
 
